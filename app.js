@@ -1,114 +1,84 @@
-// Verifichiamo se la variabile globale "firebase" esiste
-if (typeof firebase === "undefined") {
-  console.error("❌ Firebase non è stato caricato. Controlla di aver incluso i file compat in index.html!");
-} else {
-  console.log("✅ Firebase compat caricato correttamente.");
+// Importa le librerie di Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// Configurazione Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
+  authDomain: "listino-e8852.firebaseapp.com",
+  projectId: "listino-e8852",
+  storageBucket: "listino-e8852.firebasestorage.app",
+  messagingSenderId: "928462463806",
+  appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
+};
+
+// Inizializza Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Login
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("Utente autenticato:", user.email);
+
+      // Verifica autorizzazione su Firestore
+      const userRef = doc(db, "utenti_autorizzati", user.email);
+      console.log("Cerco doc Firestore con ID:", user.email);
+      const docSnap = await getDoc(userRef);
+
+      if (docSnap.exists()) {
+        console.log("docSnap trovato:", docSnap.data());
+        if (docSnap.data().autorizzato) {
+          console.log("Accesso autorizzato");
+          localStorage.setItem("utente", user.email);
+          window.location.href = "listino.html";
+        } else {
+          console.error("Utente non autorizzato");
+          alert("Accesso non autorizzato.");
+        }
+      } else {
+        console.error("docSnap: Non esiste in Firestore");
+        alert("Accesso negato: utente non trovato nel database.");
+      }
+    } catch (error) {
+      console.error("Errore login:", error.message);
+      alert("Errore login: " + error.message);
+    }
+  });
 }
 
-// Riferimenti ai servizi Firebase
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// LOGIN
-document.getElementById("loginForm")?.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      console.log("✅ Login riuscito:", userCredential.user);
-      // Salva l'orario di login in localStorage
-      localStorage.setItem("loginTime", Date.now());
-      // Reindirizza a listino.html
-      window.location.href = "listino.html";
-    })
-    .catch((error) => {
-      console.error("❌ Errore login:", error.message);
-      document.getElementById("error-message")?.classList.remove("hidden");
+// Logout
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    signOut(auth).then(() => {
+      console.log("Utente disconnesso");
+      localStorage.removeItem("utente");
+      window.location.href = "index.html";
+    }).catch((error) => {
+      console.error("Errore logout:", error.message);
     });
-});
+  });
+}
 
-// CONTROLLO AUTENTICAZIONE
-auth.onAuthStateChanged((user) => {
+// Verifica stato utente
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("👤 Utente autenticato:", user.email);
-
-    // LOG EXTRA: Indica quale doc stiamo cercando
-    console.log("📋 Cerco doc Firestore con ID:", user.email);
-
-    db.collection("utenti_autorizzati").doc(user.email).get()
-      .then((docSnap) => {
-        // LOG: Mostra cosa ha trovato
-        console.log("📋 docSnap:", docSnap.exists ? docSnap.data() : "Non esiste in Firestore");
-
-        if (docSnap.exists && docSnap.data().autorizzato) {
-          console.log("✅ Accesso autorizzato:", user.email);
-        } else {
-          console.warn("❌ Accesso negato:", user.email);
-          alert("Accesso non autorizzato.");
-          auth.signOut();
-          window.location.href = "index.html";
-        }
-      });
-
-    // Sessione valida 15 giorni
-    const loginTime = localStorage.getItem("loginTime");
-    if (loginTime && (Date.now() - loginTime) > (15 * 24 * 60 * 60 * 1000)) {
-      console.log("⚠️ Sessione scaduta!");
-      auth.signOut();
-    }
+    console.log("Utente loggato:", user.email);
   } else {
-    console.log("🔓 Nessun utente autenticato.");
-    // Protezione: se qualcuno apre listino.html senza essere loggato
+    console.log("Nessun utente autenticato.");
     if (window.location.pathname.includes("listino.html")) {
       window.location.href = "index.html";
     }
   }
 });
-
-// LOGOUT
-document.getElementById("logoutBtn")?.addEventListener("click", () => {
-  auth.signOut().then(() => {
-    console.log("🚪 Logout effettuato");
-    window.location.href = "index.html";
-  });
-});
-
-// FUNZIONE PER CARICARE IL LISTINO
-async function caricaListino() {
-  const user = auth.currentUser;
-  if (!user) {
-    console.log("🔴 Utente non autenticato, impossibile caricare il listino.");
-    return;
-  }
-
-  const docRef = db.collection("listini").doc("listino_2025");
-  const docSnap = await docRef.get();
-
-  if (docSnap.exists) {
-    console.log("📋 Dati del listino:", docSnap.data());
-    mostraListino(docSnap.data().prodotti);
-  } else {
-    console.log("❌ Nessun listino trovato.");
-  }
-}
-
-// MOSTRA LISTINO IN TABELLA
-function mostraListino(prodotti) {
-  const tableBody = document.getElementById("listino-table");
-  if (!tableBody) return;
-
-  tableBody.innerHTML = "";
-  prodotti.forEach((item) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${item.codice}</td><td>${item.descrizione}</td><td>${item.prezzo} €</td>`;
-    tableBody.appendChild(row);
-  });
-}
-
-// Se siamo su listino.html, carica subito i dati
-if (window.location.pathname.includes("listino.html")) {
-  caricaListino();
-}
