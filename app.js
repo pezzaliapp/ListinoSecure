@@ -1,25 +1,31 @@
-// Assicurati che Firebase sia stato caricato prima di eseguire questo script
+// Verifichiamo se la variabile globale "firebase" esiste
 if (typeof firebase === "undefined") {
-  console.error("❌ Errore: Firebase non è stato caricato correttamente.");
+  console.error("❌ Firebase non è stato caricato. Controlla di aver incluso i file compat in index.html!");
 } else {
-  console.log("✅ Firebase caricato correttamente.");
+  console.log("✅ Firebase compat caricato correttamente.");
 }
 
-// 🔐 Riferimenti ai servizi Firebase
+// Riferimenti ai servizi Firebase
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// 🔐 Login
+// ------------------------------------
+// LOGIN
+// ------------------------------------
 document.getElementById("loginForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
-  
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
       console.log("✅ Login riuscito:", userCredential.user);
+
+      // Salva l'orario di login in localStorage
       localStorage.setItem("loginTime", Date.now());
+
+      // Reindirizza a listino.html
       window.location.href = "listino.html";
     })
     .catch((error) => {
@@ -28,14 +34,17 @@ document.getElementById("loginForm")?.addEventListener("submit", (e) => {
     });
 });
 
-// 🔐 Controllo stato autenticazione
+// ------------------------------------
+// CONTROLLO AUTENTICAZIONE
+// ------------------------------------
 auth.onAuthStateChanged((user) => {
   if (user) {
     console.log("👤 Utente autenticato:", user.email);
 
-    db.collection("utenti_autorizzati").doc(user.email).get().then((doc) => {
-      if (doc.exists && doc.data().autorizzato) {
-        console.log("✅ Accesso autorizzato.");
+    // Controllo se l'utente è autorizzato in Firestore
+    db.collection("utenti_autorizzati").doc(user.email).get().then((docSnap) => {
+      if (docSnap.exists && docSnap.data().autorizzato) {
+        console.log("✅ Accesso autorizzato:", user.email);
       } else {
         console.warn("❌ Accesso negato:", user.email);
         alert("Accesso non autorizzato.");
@@ -44,20 +53,24 @@ auth.onAuthStateChanged((user) => {
       }
     });
 
+    // Sessione valida per 15 giorni
     const loginTime = localStorage.getItem("loginTime");
-    if (loginTime && (Date.now() - loginTime) > 15 * 24 * 60 * 60 * 1000) {
+    if (loginTime && (Date.now() - loginTime) > (15 * 24 * 60 * 60 * 1000)) {
       console.log("⚠️ Sessione scaduta!");
       auth.signOut();
     }
   } else {
     console.log("🔓 Nessun utente autenticato.");
+    // Protezione: se qualcuno apre listino.html senza essere loggato
     if (window.location.pathname.includes("listino.html")) {
       window.location.href = "index.html";
     }
   }
 });
 
-// 🔐 Logout
+// ------------------------------------
+// LOGOUT
+// ------------------------------------
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   auth.signOut().then(() => {
     console.log("🚪 Logout effettuato");
@@ -65,7 +78,9 @@ document.getElementById("logoutBtn")?.addEventListener("click", () => {
   });
 });
 
-// 📦 Funzione per caricare il listino da Firestore
+// ------------------------------------
+// CARICA LISTINO
+// ------------------------------------
 async function caricaListino() {
   const user = auth.currentUser;
   if (!user) {
@@ -73,6 +88,7 @@ async function caricaListino() {
     return;
   }
 
+  // Legge il documento "listino_2025" nella collezione "listini"
   const docRef = db.collection("listini").doc("listino_2025");
   const docSnap = await docRef.get();
 
@@ -84,11 +100,14 @@ async function caricaListino() {
   }
 }
 
-// 📊 Funzione per mostrare il listino in tabella
+// ------------------------------------
+// MOSTRA LISTINO IN TABELLA
+// ------------------------------------
 function mostraListino(prodotti) {
   const tableBody = document.getElementById("listino-table");
+  if (!tableBody) return;
+  
   tableBody.innerHTML = "";
-
   prodotti.forEach((item) => {
     const row = document.createElement("tr");
     row.innerHTML = `<td>${item.codice}</td><td>${item.descrizione}</td><td>${item.prezzo} €</td>`;
@@ -96,7 +115,9 @@ function mostraListino(prodotti) {
   });
 }
 
-// 📌 Se siamo su listino.html, carica i dati
+// ------------------------------------
+// SE SIAMO SU listino.html, CARICA I DATI
+// ------------------------------------
 if (window.location.pathname.includes("listino.html")) {
   caricaListino();
 }
