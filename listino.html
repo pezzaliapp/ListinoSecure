@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ListinoSecure - Listino</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="icon/ListinoSecure-192.png" type="image/png">
+</head>
+<body>
+  <div class="container">
+    <h1>Listino Prezzi</h1>
+    <button id="logoutBtn">Logout</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Codice</th>
+          <th>Descrizione</th>
+          <th>Prezzo (€)</th>
+        </tr>
+      </thead>
+      <tbody id="listino-table">
+        <!-- I dati verranno caricati da Firestore -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
