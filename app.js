@@ -1,20 +1,16 @@
-// Inizializza Firebase (assicurati che Firebase sia incluso in index.html)
-const firebaseConfig = {
-  apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
-  authDomain: "listino-e8852.firebaseapp.com",
-  projectId: "listino-e8852",
-  storageBucket: "listino-e8852.firebasestorage.app",
-  messagingSenderId: "928462463806",
-  appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
-};
+// Assicurati che Firebase sia stato caricato prima di eseguire questo script
+if (typeof firebase === "undefined") {
+  console.error("❌ Errore: Firebase non è stato caricato correttamente.");
+} else {
+  console.log("✅ Firebase caricato correttamente.");
+}
 
-// Inizializza Firebase
-firebase.initializeApp(firebaseConfig);
+// 🔐 Riferimenti ai servizi Firebase
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 // 🔐 Login
-document.getElementById("loginForm").addEventListener("submit", (e) => {
+document.getElementById("loginForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
   
   const email = document.getElementById("email").value;
@@ -23,11 +19,7 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
   auth.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
       console.log("✅ Login riuscito:", userCredential.user);
-
-      // Salva la data di accesso in localStorage
       localStorage.setItem("loginTime", Date.now());
-
-      // Reindirizza alla pagina listino
       window.location.href = "listino.html";
     })
     .catch((error) => {
@@ -41,7 +33,6 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     console.log("👤 Utente autenticato:", user.email);
 
-    // Controlla se l'utente è autorizzato in Firestore
     db.collection("utenti_autorizzati").doc(user.email).get().then((doc) => {
       if (doc.exists && doc.data().autorizzato) {
         console.log("✅ Accesso autorizzato.");
@@ -49,11 +40,10 @@ auth.onAuthStateChanged((user) => {
         console.warn("❌ Accesso negato:", user.email);
         alert("Accesso non autorizzato.");
         auth.signOut();
-        window.location.href = "index.html"; // Rimanda al login
+        window.location.href = "index.html";
       }
     });
 
-    // Controlla se sono passati più di 15 giorni
     const loginTime = localStorage.getItem("loginTime");
     if (loginTime && (Date.now() - loginTime) > 15 * 24 * 60 * 60 * 1000) {
       console.log("⚠️ Sessione scaduta!");
@@ -62,7 +52,7 @@ auth.onAuthStateChanged((user) => {
   } else {
     console.log("🔓 Nessun utente autenticato.");
     if (window.location.pathname.includes("listino.html")) {
-      window.location.href = "index.html"; // Protezione per accesso diretto
+      window.location.href = "index.html";
     }
   }
 });
