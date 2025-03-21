@@ -9,9 +9,7 @@ if (typeof firebase === "undefined") {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ------------------------------------
 // LOGIN
-// ------------------------------------
 document.getElementById("loginForm")?.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -21,39 +19,41 @@ document.getElementById("loginForm")?.addEventListener("submit", (e) => {
   auth.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
       console.log("✅ Login riuscito:", userCredential.user);
-
       // Salva l'orario di login in localStorage
       localStorage.setItem("loginTime", Date.now());
-
       // Reindirizza a listino.html
       window.location.href = "listino.html";
     })
     .catch((error) => {
       console.error("❌ Errore login:", error.message);
-      document.getElementById("error-message").classList.remove("hidden");
+      document.getElementById("error-message")?.classList.remove("hidden");
     });
 });
 
-// ------------------------------------
 // CONTROLLO AUTENTICAZIONE
-// ------------------------------------
 auth.onAuthStateChanged((user) => {
   if (user) {
     console.log("👤 Utente autenticato:", user.email);
 
-    // Controllo se l'utente è autorizzato in Firestore
-    db.collection("utenti_autorizzati").doc(user.email).get().then((docSnap) => {
-      if (docSnap.exists && docSnap.data().autorizzato) {
-        console.log("✅ Accesso autorizzato:", user.email);
-      } else {
-        console.warn("❌ Accesso negato:", user.email);
-        alert("Accesso non autorizzato.");
-        auth.signOut();
-        window.location.href = "index.html";
-      }
-    });
+    // LOG EXTRA: Indica quale doc stiamo cercando
+    console.log("📋 Cerco doc Firestore con ID:", user.email);
 
-    // Sessione valida per 15 giorni
+    db.collection("utenti_autorizzati").doc(user.email).get()
+      .then((docSnap) => {
+        // LOG: Mostra cosa ha trovato
+        console.log("📋 docSnap:", docSnap.exists ? docSnap.data() : "Non esiste in Firestore");
+
+        if (docSnap.exists && docSnap.data().autorizzato) {
+          console.log("✅ Accesso autorizzato:", user.email);
+        } else {
+          console.warn("❌ Accesso negato:", user.email);
+          alert("Accesso non autorizzato.");
+          auth.signOut();
+          window.location.href = "index.html";
+        }
+      });
+
+    // Sessione valida 15 giorni
     const loginTime = localStorage.getItem("loginTime");
     if (loginTime && (Date.now() - loginTime) > (15 * 24 * 60 * 60 * 1000)) {
       console.log("⚠️ Sessione scaduta!");
@@ -68,9 +68,7 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// ------------------------------------
 // LOGOUT
-// ------------------------------------
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   auth.signOut().then(() => {
     console.log("🚪 Logout effettuato");
@@ -78,9 +76,7 @@ document.getElementById("logoutBtn")?.addEventListener("click", () => {
   });
 });
 
-// ------------------------------------
-// CARICA LISTINO
-// ------------------------------------
+// FUNZIONE PER CARICARE IL LISTINO
 async function caricaListino() {
   const user = auth.currentUser;
   if (!user) {
@@ -88,7 +84,6 @@ async function caricaListino() {
     return;
   }
 
-  // Legge il documento "listino_2025" nella collezione "listini"
   const docRef = db.collection("listini").doc("listino_2025");
   const docSnap = await docRef.get();
 
@@ -100,13 +95,11 @@ async function caricaListino() {
   }
 }
 
-// ------------------------------------
 // MOSTRA LISTINO IN TABELLA
-// ------------------------------------
 function mostraListino(prodotti) {
   const tableBody = document.getElementById("listino-table");
   if (!tableBody) return;
-  
+
   tableBody.innerHTML = "";
   prodotti.forEach((item) => {
     const row = document.createElement("tr");
@@ -115,9 +108,7 @@ function mostraListino(prodotti) {
   });
 }
 
-// ------------------------------------
-// SE SIAMO SU listino.html, CARICA I DATI
-// ------------------------------------
+// Se siamo su listino.html, carica subito i dati
 if (window.location.pathname.includes("listino.html")) {
   caricaListino();
 }
