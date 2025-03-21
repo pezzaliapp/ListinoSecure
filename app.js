@@ -1,75 +1,74 @@
-// Import Firebase modules
+// Importa Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Firebase configuration
+// Configurazione Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
-  authDomain: "listino-e8852.firebaseapp.com",
-  projectId: "listino-e8852",
-  storageBucket: "listino-e8852.firebasestorage.app",
-  messagingSenderId: "928462463806",
-  appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
+    apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
+    authDomain: "listino-e8852.firebaseapp.com",
+    projectId: "listino-e8852",
+    storageBucket: "listino-e8852.firebasestorage.app",
+    messagingSenderId: "928462463806",
+    appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
 };
 
-// Initialize Firebase
+// Inizializza Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Login function
+// ✅ LOGIN
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+    e.preventDefault(); // 🔹 EVITA IL RESET DEL FORM
 
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("Utente autenticato:", userCredential.user.email);
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
 
-    // Check Firestore authorization
-    const userDocRef = doc(db, "utenti_autorizzati", email);
-    const docSnap = await getDoc(userDocRef);
+    const email = emailInput.value.trim();  // 🔹 Rimuove spazi bianchi
+    const password = passwordInput.value;
 
-    if (docSnap.exists()) {
-      console.log("Accesso autorizzato", email);
-      localStorage.setItem("user", email);
-      window.location.href = "listino.html";
+    console.log("🔹 Tentativo di login con:", email);
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("✅ Login riuscito:", user.email);
+
+        // Controlla l'autorizzazione in Firestore
+        const userDocRef = doc(db, "utenti_autorizzati", user.email);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists() && docSnap.data().autorizzato === true) {
+            console.log("✅ Utente autorizzato:", user.email);
+            window.location.href = "listino.html"; // 🔹 REINDIRIZZA alla pagina del listino
+        } else {
+            console.warn("⛔ Utente NON autorizzato:", user.email);
+            alert("Accesso non autorizzato.");
+            await signOut(auth);
+        }
+    } catch (error) {
+        console.error("❌ Errore login:", error.code, error.message);
+        alert("Errore durante il login: " + error.message);
+    }
+});
+
+// ✅ CONTROLLA LOGIN ATTIVO
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("🔹 Utente autenticato:", user.email);
     } else {
-      console.error("Accesso negato: l'utente non è autorizzato in Firestore");
-      alert("Accesso non autorizzato.");
-      signOut(auth);
+        console.log("❌ Nessun utente autenticato");
     }
-  } catch (error) {
-    console.error("Errore login:", error.message);
-    alert("Errore login: " + error.message);
-  }
 });
 
-// Logout function
+// ✅ LOGOUT
 document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-  await signOut(auth);
-  localStorage.removeItem("user");
-  window.location.href = "index.html";
-});
-
-// Protect listino.html page
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    console.log("Nessun utente autenticato. Reindirizzamento a index.html");
-    window.location.href = "index.html";
-  } else {
-    console.log("Utente autenticato:", user.email);
-    
-    // Check authorization again
-    const userDocRef = doc(db, "utenti_autorizzati", user.email);
-    const docSnap = await getDoc(userDocRef);
-    if (!docSnap.exists()) {
-      console.log("docSnap: Non esiste in Firestore");
-      alert("Accesso non autorizzato.");
-      await signOut(auth);
-      window.location.href = "index.html";
+    try {
+        await signOut(auth);
+        console.log("🔹 Logout eseguito.");
+        window.location.href = "index.html";
+    } catch (error) {
+        console.error("❌ Errore logout:", error);
     }
-  }
 });
