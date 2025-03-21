@@ -18,6 +18,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Protezione di listino.html: se l'utente non è loggato, torna al login
+onAuthStateChanged(auth, (user) => {
+  if (!user && window.location.pathname.includes("listino.html")) {
+    window.location.href = "index.html"; // Rimanda al login
+  }
+});
+
 // Gestione login
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
