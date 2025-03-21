@@ -19,12 +19,12 @@
     <p id="error-message" class="hidden">Email o password errati.</p>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- 🔥 Firebase SDK deve essere caricato PRIMA di app.js -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
 
-  <!-- Inizializza Firebase -->
+  <!-- 🔥 Inizializza Firebase -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
@@ -35,11 +35,10 @@
       appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
     };
 
-    // Inizializza Firebase
     firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Collegamento a app.js -->
+  <!-- 🔥 Collegamento a app.js (DEVE ESSERE DOPO Firebase) -->
   <script src="app.js"></script>
 
   <!-- Service Worker -->
