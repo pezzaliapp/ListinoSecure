@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ListinoSecure - Login</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
@@ -19,27 +19,25 @@
     <p id="error-message" class="hidden">Email o password errati.</p>
   </div>
 
-  <!-- 🔥 Firebase SDK (compat version 9.x) -->
+  <!-- Firebase SDK compat (versione 9.x) -->
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
 
-  <!-- 🔥 Inizializza Firebase -->
+  <!-- Inizializza Firebase compat con i TUOI dati reali -->
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyB-qui-la-tua-apiKey",
+      apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
       authDomain: "listino-e8852.firebaseapp.com",
       projectId: "listino-e8852",
       storageBucket: "listino-e8852.firebasestorage.app",
       messagingSenderId: "928462463806",
       appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
     };
-
-    // Inizializzazione Firebase compat
     firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Collegamento a app.js (nessun type="module") -->
+  <!-- Collegamento a app.js (NO type="module") -->
   <script src="app.js"></script>
 
   <!-- Service Worker -->
