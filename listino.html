@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ListinoSecure - Listino</title>
-  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="icon/ListinoSecure-192.png" type="image/png">
 </head>
 <body>
   <div class="container">
-    <h1>Listino Prezzi</h1>
+    <h1>Listino Prezzi (Anonimo)</h1>
     <button id="logoutBtn">Logout</button>
 
     <table>
@@ -22,39 +20,17 @@
         </tr>
       </thead>
       <tbody id="listino-table">
-        <!-- I dati verranno caricati da Firestore -->
+        <!-- Riempito da Firestore -->
       </tbody>
     </table>
   </div>
 
-  <!-- Firebase SDK compat (versione 9.x) -->
+  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
 
-  <!-- Inizializza Firebase compat con i TUOI dati reali -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
-      authDomain: "listino-e8852.firebaseapp.com",
-      projectId: "listino-e8852",
-      storageBucket: "listino-e8852.firebasestorage.app",
-      messagingSenderId: "928462463806",
-      appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- Collegamento a app.js (NO type="module") -->
+  <!-- app.js -->
   <script src="app.js"></script>
-
-  <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(reg => console.log("✅ Service Worker registrato", reg))
-        .catch(err => console.error("❌ Errore Service Worker:", err));
-    }
-  </script>
 </body>
 </html>
