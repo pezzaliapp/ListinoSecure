@@ -1,74 +1,108 @@
-// Importa Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// Firebase CDN (inseriti direttamente in index.html o listino.html)
+// <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+// <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js"></script>
+// <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
 
-// Configurazione Firebase
+// ⚙️ Config Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
-    authDomain: "listino-e8852.firebaseapp.com",
-    projectId: "listino-e8852",
-    storageBucket: "listino-e8852.firebasestorage.app",
-    messagingSenderId: "928462463806",
-    appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
+  apiKey: "AIzaSyBAqx_T4TTyQhHJxdpBOljl74vXVJ61Inc",
+  authDomain: "listino-e8852.firebaseapp.com",
+  projectId: "listino-e8852",
+  storageBucket: "listino-e8852.appspot.com",
+  messagingSenderId: "928462463806",
+  appId: "1:928462463806:web:bd55e36b68254ea1e4c26f"
 };
 
 // Inizializza Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// ✅ LOGIN
-document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault(); // 🔹 EVITA IL RESET DEL FORM
+console.log("✅ Firebase inizializzato");
 
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
+// 🎯 LOGIN
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
-    const email = emailInput.value.trim();  // 🔹 Rimuove spazi bianchi
-    const password = passwordInput.value;
+    console.log("🔑 Tentativo login con:", email);
 
-    console.log("🔹 Tentativo di login con:", email);
+    auth.signInWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        console.log("✅ Login riuscito:", userCredential.user.email);
 
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        console.log("✅ Login riuscito:", user.email);
+        // Salvo l'email localmente
+        localStorage.setItem("utenteEmail", email);
 
-        // Controlla l'autorizzazione in Firestore
-        const userDocRef = doc(db, "utenti_autorizzati", user.email);
-        const docSnap = await getDoc(userDocRef);
+        // Vai a listino
+        window.location.href = "listino.html";
+      })
+      .catch(error => {
+        console.error("❌ Errore login:", error.message);
+        alert("Errore login: " + error.message);
+      });
+  });
+}
 
-        if (docSnap.exists() && docSnap.data().autorizzato === true) {
-            console.log("✅ Utente autorizzato:", user.email);
-            window.location.href = "listino.html"; // 🔹 REINDIRIZZA alla pagina del listino
-        } else {
-            console.warn("⛔ Utente NON autorizzato:", user.email);
-            alert("Accesso non autorizzato.");
-            await signOut(auth);
-        }
-    } catch (error) {
-        console.error("❌ Errore login:", error.code, error.message);
-        alert("Errore durante il login: " + error.message);
-    }
-});
-
-// ✅ CONTROLLA LOGIN ATTIVO
-onAuthStateChanged(auth, (user) => {
+// 🔐 LISTINO: Verifica autorizzazione
+if (window.location.pathname.includes("listino.html")) {
+  auth.onAuthStateChanged(user => {
     if (user) {
-        console.log("🔹 Utente autenticato:", user.email);
-    } else {
-        console.log("❌ Nessun utente autenticato");
-    }
-});
+      console.log("👤 Utente autenticato:", user.email);
 
-// ✅ LOGOUT
-document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-    try {
-        await signOut(auth);
-        console.log("🔹 Logout eseguito.");
-        window.location.href = "index.html";
-    } catch (error) {
-        console.error("❌ Errore logout:", error);
+      const docRef = db.collection("utenti_autorizzati").doc(user.email);
+      console.log("🔍 Cerco doc Firestore con ID:", user.email);
+
+      docRef.get().then(docSnap => {
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          console.log("📄 docSnap:", data);
+
+          if (data.autorizzato === true) {
+            console.log("✅ Utente autorizzato");
+
+            // Carica listino
+            db.collection("listini").get().then(snapshot => {
+              const table = document.getElementById("listino-table");
+              snapshot.forEach(doc => {
+                const item = doc.data();
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                  <td>${item.codice || ""}</td>
+                  <td>${item.descrizione || ""}</td>
+                  <td>${item.prezzo || ""}</td>
+                `;
+                table.appendChild(row);
+              });
+            });
+          } else {
+            console.warn("⛔ Non autorizzato:", user.email);
+            alert("Accesso non autorizzato.");
+            window.location.href = "index.html";
+          }
+        } else {
+          console.warn("📛 docSnap: Non esiste in Firestore");
+          alert("Accesso non autorizzato.");
+          window.location.href = "index.html";
+        }
+      });
+    } else {
+      console.warn("🔒 Nessun utente autenticato.");
+      window.location.href = "index.html";
     }
-});
+  });
+
+  // Logout
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      auth.signOut().then(() => {
+        console.log("👋 Logout effettuato");
+        window.location.href = "index.html";
+      });
+    });
+  }
+}
