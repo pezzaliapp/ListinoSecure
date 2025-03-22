@@ -1,0 +1,42 @@
+[
+  {
+    "CODICE":20100376,
+    "DESCRIZIONE":"DISPOSITIVO INDUSTRIA 4.0 PUMA",
+    "PrezzoLordo":3750
+  },
+  {
+    "CODICE":20100377,
+    "DESCRIZIONE":"DISPOSITIVO INDUSTRIA 4.0 CM 1200BB",
+    "PrezzoLordo":3750
+  },
+  {
+    "CODICE":20100378,
+    "DESCRIZIONE":"DISPOSITIVO INDUSTRIA 4.0 SUPER VIGOR 2450N, SUPER VIGOR 60",
+    "PrezzoLordo":3750
+  },
+  {
+    "CODICE":25100299,
+    "DESCRIZIONE":"KIT INDUSTRIA 4.0 L 3300, L 3400, PFA40\/50, L1500-A BATTERY LIFT",
+    "PrezzoLordo":1500
+  },
+  {
+    "CODICE":25100300,
+    "DESCRIZIONE":"KIT INDUSTRIA 4.0 L 3000N",
+    "PrezzoLordo":1500
+  },
+  {
+    "CODICE":14100006,
+    "DESCRIZIONE":"HANDY SCAN",
+    "PrezzoLordo":3390
+  },
+  {
+    "CODICE":1100216,
+    "DESCRIZIONE":"TOUCH MEC 1000 SONAR CE 1ph 230V",
+    "PrezzoLordo":9250
+  },
+  {
+    "CODICE":1100218,
+    "DESCRIZIONE":"TOUCH MEC 1000-P SONAR CE 1ph 230V",
+    "PrezzoLordo":12370
+  }
+]
