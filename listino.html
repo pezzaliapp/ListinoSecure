@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ListinoSecure - Listino</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Listino Prezzi</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Listino Prezzi (Anonimo)</h1>
-    <button id="logoutBtn">Logout</button>
-
+    <h1 id="titolo">Listino Prezzi</h1>
+    <button id="logout">Logout</button>
     <table>
       <thead>
         <tr>
@@ -19,18 +19,12 @@
           <th>Prezzo (€)</th>
         </tr>
       </thead>
-      <tbody id="listino-table">
-        <!-- Riempito da Firestore -->
+      <tbody id="listino-body">
+        <!-- righe dinamiche -->
       </tbody>
     </table>
   </div>
 
-  <!-- Firebase compat -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore-compat.js"></script>
-
-  <!-- app.js -->
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
