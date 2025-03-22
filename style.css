@@ -1,98 +1,49 @@
-/* Stile generale */
 body {
   font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
+  margin: 0; 
+  padding: 0; 
+  background: #f4f4f4; 
   text-align: center;
 }
-
-/* Contenitore login */
 .login-container {
-  width: 100%;
-  max-width: 350px;
+  width: 300px;
   margin: 100px auto;
-  padding: 20px;
+  padding: 20px; 
+  background: white; 
+  border-radius: 8px;
+}
+.container {
+  width: 90%; 
+  max-width: 600px; 
+  margin: 50px auto; 
+  padding: 20px; 
   background: white;
   border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
-
-h1 {
-  font-size: 24px;
-  color: #333;
-}
-
-/* Form di login */
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
 button {
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 10px; 
+  margin-top: 10px; 
+  border: none; 
+  background: #007BFF; 
+  color: white; 
+  cursor: pointer; 
+  border-radius: 5px; 
   font-size: 16px;
 }
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* Messaggio di errore */
-#error-message {
-  color: red;
-  font-size: 14px;
-  display: none;
-}
-
-/* Container principale */
-.container {
-  width: 90%;
-  max-width: 800px;
-  margin: 50px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Tabella del listino */
 table {
-  width: 100%;
-  border-collapse: collapse;
+  width: 100%; 
+  border-collapse: collapse; 
   margin-top: 20px;
 }
-
 th, td {
-  padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #ddd; 
+  padding: 10px; 
   text-align: left;
 }
-
 th {
-  background-color: #007BFF;
+  background: #007BFF; 
   color: white;
 }
-
-/* Pulsante logout */
-#logoutBtn {
-  background-color: #dc3545;
-}
-
-#logoutBtn:hover {
-  background-color: #a71d2a;
+.hidden {
+  display: none;
 }
